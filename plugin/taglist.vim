@@ -152,6 +152,10 @@ if !exists('loaded_taglist')
         endif
     endif
 
+	if !exists('Tlist_Skip_Anon_Field')
+		let Tlist_Skip_Anon_Field = 0
+	endif
+
     " Vertically split taglist window width setting
     if !exists('Tlist_WinWidth')
         let Tlist_WinWidth = 30
@@ -385,6 +389,10 @@ let s:tlist_def_c_settings = 'c;d:macro;g:enum;s:struct;u:union;t:typedef;' .
 " c++ language
 let s:tlist_def_cpp_settings = 'c++;n:namespace;v:variable;d:macro;t:typedef;' .
                              \ 'c:class;g:enum;s:struct;u:union;f:function'
+
+" cuda language
+let s:tlist_def_cuda_settings = 'c++;n:namespace;v:variable;d:macro;t:typedef;' .
+                              \ 'c:class;g:enum;s:struct;u:union;f:function'
 
 " c# language
 let s:tlist_def_cs_settings = 'c#;d:macro;t:typedef;n:namespace;c:class;' .
@@ -2154,6 +2162,13 @@ function! s:Tlist_Parse_Tagline(tag_line)
         return
     endif
 
+    " Extract the tag name
+    let tag_name = strpart(a:tag_line, 0, stridx(a:tag_line, "\t"))
+    if g:Tlist_Skip_Anon_Field && tag_name =~ "^\_\_anon"
+        " Skip if this is anonymous field.
+        return
+    endif
+
     " Update the total tag count
     let s:tidx = s:tidx + 1
 
@@ -2173,9 +2188,6 @@ function! s:Tlist_Parse_Tagline(tag_line)
     " Store the tag index and the tag type index (back pointers)
     let {fidx_ttype}_{ttype_idx} = s:tidx
     let {fidx_tidx}_ttype_idx = ttype_idx
-
-    " Extract the tag name
-    let tag_name = strpart(a:tag_line, 0, stridx(a:tag_line, "\t"))
 
     " Extract the tag scope/prototype
     if g:Tlist_Display_Prototype
@@ -2368,6 +2380,13 @@ function! s:Tlist_Process_File(filename, ftype)
                 continue
             endif
 
+            " Extract the tag name
+            let tag_name = strpart(one_line, 0, stridx(one_line, "\t"))
+            if g:Tlist_Skip_Anon_Field && tag_name =~ "^\_\_anon"
+                " Skip if this is anonymous field.
+                continue
+            endif
+
             " Update the total tag count
             let tidx = tidx + 1
 
@@ -2389,8 +2408,6 @@ function! s:Tlist_Process_File(filename, ftype)
             let {fidx_ttype}_{ttype_idx} = tidx
             let {fidx_tidx}_ttype_idx = ttype_idx
 
-            " Extract the tag name
-            let tag_name = strpart(one_line, 0, stridx(one_line, "\t"))
 
             " Extract the tag scope/prototype
             if g:Tlist_Display_Prototype
