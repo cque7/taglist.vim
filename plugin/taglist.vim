@@ -1529,6 +1529,7 @@ function! s:Tlist_Window_Init()
     endif
 
     silent! setlocal nowrap
+    silent! setlocal nospell
 
     " If the 'number' option is set in the source window, it will affect the
     " taglist window. So forcefully disable 'number' option for the taglist
